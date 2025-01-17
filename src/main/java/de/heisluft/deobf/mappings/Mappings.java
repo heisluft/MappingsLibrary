@@ -1,8 +1,5 @@
 package de.heisluft.deobf.mappings;
 
-import de.heisluft.deobf.mappings.util.TetraConsumer;
-import de.heisluft.deobf.mappings.util.TriConsumer;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,17 +17,15 @@ import java.util.function.BiConsumer;
  * <br>
  * Mappings are considered to be immutable, as there is no API exposing mutable data.
  * To create Mappings from outside the package, use {@link MappingsBuilder} instances.
- *
- * Note: This class is to be rendered final in a future release. Overriding is strongly discouraged.
  */
 //TODO: evaluate mapping conversions with package relocations
-public class Mappings {
+public final class Mappings {
 
   /**
    * An invalid descriptor is used here that won't confuse {@link #remapDescriptor(String)}.
    * Fields will never actually have this type as this is disallowed per spec.
    */
-  protected static final String EMPTY_FIELD_DESCRIPTOR = "EF";
+  static final String EMPTY_FIELD_DESCRIPTOR = "EF";
 
   /** All primitive binary names. Includes the empty field descriptor. */
   private static final List<String> PRIMITIVES = Arrays.asList(
@@ -38,35 +33,35 @@ public class Mappings {
   );
 
   /** All package relocations. */
-  protected final Map<String, String> packages = new HashMap<>();
+  final Map<String, String> packages = new HashMap<>();
 
   /**
    * All Class mappings, names are jvm names ('/' as delimiter).
-   * Mapped as follows: classMame -> remappedClassName
+   * Mapped as follows: classMame -&gt; remappedClassName
    */
-  protected final Map<String, String> classes = new HashMap<>();
+  final Map<String, String> classes = new HashMap<>();
 
-  /** All field mappings mapped as follows: className -> (fieldName + fieldDesc) -> remappedName. */
-  protected final Map<String, Map<MemberData, String>> fields = new HashMap<>();
+  /** All field mappings mapped as follows: className -&gt; (fieldName + fieldDesc) -&gt; remappedName. */
+  final Map<String, Map<MemberData, String>> fields = new HashMap<>();
 
-  /** All method mappings mapped as follows: className -> (methodName + methodDesc) -> remappedName. */
-  protected final Map<String, Map<MemberData, String>> methods = new HashMap<>();
+  /** All method mappings mapped as follows: className -&gt; (methodName + methodDesc) -&gt; remappedName. */
+  final Map<String, Map<MemberData, String>> methods = new HashMap<>();
 
   /**
    * All exceptions and parameters added with the mappings, mapped by className + methodName + methodDesc
    * set of exception class names, list of parameter names. exception class names may or may not be already remapped
    */
-  protected final Map<String, Map<MemberData, MdExtra>> extraData = new HashMap<>();
+  final Map<String, Map<MemberData, MdExtra>> extraData = new HashMap<>();
 
   /** Mappings are not to be instantiated outside the Package, use {@link MappingsBuilder#build()}. */
-  protected Mappings() {}
+  Mappings() {}
 
   /**
    * Clone the given mappings. Values are deep-cloned, as the backing Maps are often mutable.
    *
    * @param toClone the mappings to clone
    */
-  protected Mappings(Mappings toClone) {
+  Mappings(Mappings toClone) {
     packages.putAll(toClone.packages);
     classes.putAll(toClone.classes);
     toClone.fields.forEach((k,v) -> fields.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
@@ -82,7 +77,7 @@ public class Mappings {
    *
    * @param consumer the function to apply
    */
-  public final void forAllPackages(BiConsumer<String, String> consumer) {
+  public void forAllPackages(BiConsumer<String, String> consumer) {
     packages.forEach(consumer);
   }
 
@@ -100,7 +95,7 @@ public class Mappings {
    *
    * @param consumer the function to apply
    */
-  public final void forAllFields(TetraConsumer<String, String, String, String> consumer) {
+  public void forAllFields(MemberMappingConsumer consumer) {
     fields.forEach((s, members) ->
         members.forEach((data, remapped) ->
             consumer.accept(s, data.name, data.desc, remapped)
@@ -113,40 +108,10 @@ public class Mappings {
    *
    * @param consumer the function to apply
    */
-  public final void forAllMethods(TetraConsumer<String, String, String, String> consumer) {
+  public void forAllMethods(MemberMappingConsumer consumer) {
     methods.forEach((s, members) ->
         members.forEach((data, remapped) ->
             consumer.accept(s, data.name, data.desc, remapped)
-        )
-    );
-  }
-
-  /**
-   * Applies a method to all field mappings.
-   *
-   * @param consumer the function to apply
-   * @deprecated use {@link #forAllFields(TetraConsumer)} instead.
-   */
-  @Deprecated
-  public void forAllFields(TriConsumer<String, String, String> consumer) {
-    fields.forEach((s, members) ->
-        members.forEach((data, remapped) ->
-            consumer.accept(s, data.name, remapped)
-        )
-    );
-  }
-
-  /**
-   * Applies a method to all method mappings.
-   *
-   * @param consumer the function to apply
-   * @deprecated use {@link #forAllMethods(TetraConsumer)} instead.
-   */
-  @Deprecated
-  public void forAllMethods(TriConsumer<String, MemberData, String> consumer) {
-    methods.forEach((s, members) ->
-        members.forEach((data, remapped) ->
-            consumer.accept(s, data, remapped)
         )
     );
   }
@@ -219,7 +184,7 @@ public class Mappings {
    *
    * @return the mapped name or {@code null} if not found
    */
-  public final String getFieldName(String className, String fieldName, String fieldDescriptor) {
+  public String getFieldName(String className, String fieldName, String fieldDescriptor) {
     Map<MemberData, String> fields = this.fields.getOrDefault(className, Collections.emptyMap());
     return fields.getOrDefault(
         new MemberData(fieldName, fieldDescriptor),
@@ -288,7 +253,7 @@ public class Mappings {
    *
    * @return true if there is a mapping for {@code className}, false otherwise
    */
-  public final boolean hasFieldMapping(String className, String fieldName, String fieldDescriptor) {
+  public boolean hasFieldMapping(String className, String fieldName, String fieldDescriptor) {
     Map<MemberData, String> fields = this.fields.getOrDefault(className, Collections.emptyMap());
     return fields.containsKey(new MemberData(fieldName, fieldDescriptor))
         || fields.containsKey(new MemberData(fieldName, EMPTY_FIELD_DESCRIPTOR));
@@ -314,10 +279,10 @@ public class Mappings {
   }
 
   /**
-   * Generates a reversed set of mappings. consider the mappings a->b, this generates b->a.
+   * Generates a reversed set of mappings. consider the mappings a-&gt;b, this generates b-&gt;a.
    * This does not generate reverse parameter mappings or "anti exceptions"
    *
-   * @return the reversed (b->a) mappings
+   * @return the reversed (b-&gt;a) mappings
    */
   public Mappings generateReverseMappings() {
     Mappings mappings = new Mappings();
@@ -372,12 +337,12 @@ public class Mappings {
 
   /**
    * Generates Mappings Mediating between these mappings and other.
-   * Consider two Mappings a->b and a->c, the returned mappings represent b->c
+   * Consider two Mappings a-&gt;b and a-&gt;c, the returned mappings represent b-&gt;c
    *
    * @param other
-   *     the mappings to convert to (the a->c mappings)
+   *     the mappings to convert to (the a-&gt;c mappings)
    *
-   * @return the resulting (b->c) mappings
+   * @return the resulting (b-&gt;c) mappings
    */
   public Mappings generateMediatorMappings(Mappings other) {
     Mappings mappings = new Mappings();
@@ -410,12 +375,12 @@ public class Mappings {
 
   /**
    * Generates Mappings Converting between these mappings and other.
-   * Consider two Mappings a->b and b->c, the returned mappings represent a->c
+   * Consider two Mappings a-&gt;b and b-&gt;c, the returned mappings represent a-&gt;c
    *
    * @param other
-   *     the mappings to convert to (the b->c mappings)
+   *     the mappings to convert to (the b-&gt;c mappings)
    *
-   * @return the resulting (a->c) mappings
+   * @return the resulting (a-&gt;c) mappings
    */
   public Mappings generateConversionMethods(Mappings other) {
     Mappings mappings = new Mappings();

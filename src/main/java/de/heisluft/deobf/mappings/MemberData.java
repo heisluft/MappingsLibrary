@@ -3,12 +3,12 @@ package de.heisluft.deobf.mappings;
 import java.util.Objects;
 
 /** An internal immutable data class for storing member metadata. */
-public final class MemberData {
+final class MemberData {
 
   /** The member name. */
-  public final String name;
+  final String name;
   /** The member descriptor. */
-  public final String desc;
+  final String desc;
 
   /**
    * Constructs new Member Metadata.
@@ -16,7 +16,7 @@ public final class MemberData {
    * @param name the non-null name of this member
    * @param desc the non-null descriptor og this member
    */
-   public MemberData(String name, String desc) {
+   MemberData(String name, String desc) {
     Objects.requireNonNull(name, "Name must not be null");
     Objects.requireNonNull(desc, "Descriptor must not be null");
     this.name = name;

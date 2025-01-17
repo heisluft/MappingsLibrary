@@ -37,20 +37,6 @@ public interface MappingsHandler {
   }
 
   /**
-   * Returns the file extension handled by this instance. Each entry will be used to parameterize
-   * the instance with {@link #withFileExt(String)}
-   *
-   * @return the file extension, never {@code null}
-   *
-   * @deprecated use {@link #fileExts()} instead. This method will be removed in a future release,
-   * only override for backwards compatibility (using your own handler with an older lib version)
-   */
-  @Deprecated
-  default String fileExt() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
    * Parameterizes this Service with one of the file extensions returned by {@link #fileExts()}.
    * Handlers providing multiple extensions might want to return new instances here
    *
@@ -68,9 +54,7 @@ public interface MappingsHandler {
    *
    * @return a collection of file extensions handled by this instance, never {@code null}
    */
-  default Collection<String> fileExts() {
-    return Collections.singleton(fileExt());
-  }
+  Collection<String> fileExts();
 
   /**
    * Checks whether this handler can (de-)serialize exception data.
