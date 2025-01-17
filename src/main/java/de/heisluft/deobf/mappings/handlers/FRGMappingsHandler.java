@@ -84,6 +84,11 @@ public final class FRGMappingsHandler implements MappingsHandler {
     return builder.build();
   }
 
+  @Override
+  public MappingsHandler withFileExt(String fileExt) {
+    return "srg2".equals(fileExt) && emitFieldDescriptors ? this : new FRGMappingsHandler(!emitFieldDescriptors);
+  }
+
   /** Used by the ServiceLoader to instantiate this class. */
   public FRGMappingsHandler() {
     this(false);
