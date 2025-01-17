@@ -1,6 +1,7 @@
 package de.heisluft.deobf.mappings.handlers;
 
 import de.heisluft.deobf.mappings.Mappings;
+import de.heisluft.deobf.mappings.MappingsBuilder;
 import de.heisluft.deobf.mappings.MappingsHandler;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public final class RGSMappingsHandler implements MappingsHandler {
 
   @Override
   public Mappings parseMappings(Path path) throws IOException {
-    RGSMappings mappings = new RGSMappings();
+    MappingsBuilder mappings = new MappingsBuilder();
     List<String> lines = Files.readAllLines(path);
     List<String> globs = new ArrayList<>();
     for(String line : lines) {
@@ -61,9 +62,9 @@ public final class RGSMappingsHandler implements MappingsHandler {
     for(int i = 0; i < globs.size(); i++) {
       String regex = "^" + globs.get(i).substring(0, globs.get(i).lastIndexOf('*')) + "[^\\/]+$";
       String newPackage = globs.get(++i).replace("**", "");
-      mappings.packages.put(regex, newPackage);
+      mappings.addPackageRelocation(regex, newPackage);
     }
-    return mappings;
+    return mappings.build();
   }
 
   private String argMismatch(String line, int expected, int actual) {

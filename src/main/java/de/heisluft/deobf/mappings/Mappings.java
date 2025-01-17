@@ -20,8 +20,10 @@ import java.util.function.BiConsumer;
  * <br>
  * Mappings are considered to be immutable, as there is no API exposing mutable data.
  * To create Mappings from outside the package, use {@link MappingsBuilder} instances.
+ *
+ * Note: This class is to be rendered final in a future release. Overriding is strongly discouraged.
  */
-//TODO: Merge capability of package relocations from RGSMappings
+//TODO: evaluate mapping conversions with package relocations
 public class Mappings {
 
   /**
@@ -34,6 +36,9 @@ public class Mappings {
   private static final List<String> PRIMITIVES = Arrays.asList(
       "B", "C", "D", "F", "I", "J", "S", "V", "Z", EMPTY_FIELD_DESCRIPTOR
   );
+
+  /** All package relocations. */
+  protected final Map<String, String> packages = new HashMap<>();
 
   /**
    * All Class mappings, names are jvm names ('/' as delimiter).
@@ -62,6 +67,7 @@ public class Mappings {
    * @param toClone the mappings to clone
    */
   protected Mappings(Mappings toClone) {
+    packages.putAll(toClone.packages);
     classes.putAll(toClone.classes);
     toClone.fields.forEach((k,v) -> fields.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
     toClone.methods.forEach((k,v) -> methods.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
@@ -69,6 +75,15 @@ public class Mappings {
         v.forEach((memberData, mdExtra) ->
             extraData.computeIfAbsent(k, _k -> new HashMap<>())
                 .computeIfAbsent(memberData, _k -> new MdExtra(mdExtra))));
+  }
+
+  /**
+   * Applies a method to all package relocations.
+   *
+   * @param consumer the function to apply
+   */
+  public final void forAllPackages(BiConsumer<String, String> consumer) {
+    packages.forEach(consumer);
   }
 
   /**
@@ -148,6 +163,11 @@ public class Mappings {
    * @see Mappings#hasClassMapping(String)
    */
   public String getClassName(String className) {
+    for(Map.Entry<String, String> relocation : packages.entrySet()) {
+      String cNameOnly = className.contains("/") ? className.substring(className.lastIndexOf('/') + 1) : className;
+      if(className.matches(relocation.getKey()))
+        return relocation.getValue() + classes.getOrDefault(cNameOnly, cNameOnly);
+    }
     return classes.getOrDefault(className, className);
   }
 
@@ -216,7 +236,7 @@ public class Mappings {
    * @return true if there is a mapping for {@code className}, false otherwise
    */
   public boolean hasClassMapping(String className) {
-    return classes.containsKey(className);
+    return classes.containsKey(className) ||  packages.keySet().stream().anyMatch(className::matches);
   }
 
   /**

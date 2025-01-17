@@ -17,7 +17,6 @@ public final class MappingsBuilder {
 
   /**
    * Constructs a new MappingsBuilder from the given set of old mappings. All entries are deep-copied.
-   * NOTE: The mappingsBuilder does not currently support package relocations, they will NOT be cloned.
    *
    * @param mappings the mappings to copy from
    */
@@ -57,6 +56,16 @@ public final class MappingsBuilder {
    */
   public void addClassMapping(String cName, String rName) {
     mappings.classes.put(cName, rName);
+  }
+
+  /**
+   * Adds a package relocation.
+   *
+   * @param pName the package name. It must be encoded as a regex that matches all classes beginning with it.
+   * @param rName the relocated package name
+   */
+  public void addPackageRelocation(String pName, String rName) {
+    mappings.packages.put(pName, rName);
   }
 
   /**
