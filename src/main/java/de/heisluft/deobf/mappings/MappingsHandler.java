@@ -3,7 +3,6 @@ package de.heisluft.deobf.mappings;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * A MappingsHandler is a class capable of parsing mapping files.
