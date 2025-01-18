@@ -12,10 +12,15 @@ java {
 }
 
 group = 'de.heisluft.deobf.lib'
-version = '2.0.0'
+version = '2.0.0-SNAPSHOT'
 
 repositories {
   mavenCentral()
+}
+
+dependencies {
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 checkstyle {
@@ -37,6 +42,8 @@ jar.manifest.attributes([
   'Implementation-Vendor': group,
 ])
 
+test.useJUnitPlatform()
+
 publishing {
   repositories.maven {
     url = mavenUrl
@@ -50,6 +57,8 @@ publishing {
     it.from components.getByName('java')
   }
 }
+
+jar.dependsOn(check)
 
 signing {
   useGpgCmd()
