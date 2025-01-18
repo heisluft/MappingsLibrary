@@ -121,6 +121,20 @@ public final class MappingsBuilder {
   }
 
   /**
+   * Adds exceptions for the given method to the mappings. Exceptions will be appended instead of overridden.
+   *
+   * @param className the binary name of the containing class
+   * @param methodName the method name
+   * @param methodDesc the methods descriptor
+   * @param exceptions the list of exceptions to add
+   */
+  public void addExceptions(String className, String methodName, String methodDesc, Collection<String> exceptions) {
+    mappings.extraData.computeIfAbsent(className, _k -> new HashMap<>())
+        .computeIfAbsent(new MemberData(methodName, methodDesc), _k -> new MdExtra())
+        .exceptions.addAll(exceptions);
+  }
+
+  /**
    * Sets the parameter mappings for a given method. Previous Mappings are overridden.
    *
    * @param className the binary name of the containing class
@@ -134,20 +148,6 @@ public final class MappingsBuilder {
         .parameters;
     params.clear();
     params.addAll(parameterNames);
-  }
-
-  /**
-   * Adds exceptions for the given method to the mappings. Exceptions will be appended instead of overridden.
-   *
-   * @param className the binary name of the containing class
-   * @param methodName the method name
-   * @param methodDesc the methods descriptor
-   * @param exceptions the list of exceptions to add
-   */
-  public void addExceptions(String className, String methodName, String methodDesc, Collection<String> exceptions) {
-    mappings.extraData.computeIfAbsent(className, _k -> new HashMap<>())
-        .computeIfAbsent(new MemberData(methodName, methodDesc), _k -> new MdExtra())
-        .exceptions.addAll(exceptions);
   }
 
   /**

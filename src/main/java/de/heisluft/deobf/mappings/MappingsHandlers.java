@@ -19,15 +19,15 @@ import java.util.ServiceLoader;
  */
 public final class MappingsHandlers {
 
+  /** All gathered MappingsHandler instances mapped by their handled fileExtension. */
+  private static final Map<String, MappingsHandler> HANDLERS = new HashMap<>();
+  /** Whether Handlers have been fetched. */
+  private static boolean hasFetched = false;
+
   /** This class should not be instantiated. */
   private MappingsHandlers() {
     throw new UnsupportedOperationException();
   }
-
-  /** Whether Handlers have been fetched. */
-  private static boolean hasFetched = false;
-  /** All gathered MappingsHandler instances mapped by their handled fileExtension. */
-  private static final Map<String, MappingsHandler> HANDLERS = new HashMap<>();
 
   /**
    * Finds a {@link MappingsHandler} for a given file. Builtin are:

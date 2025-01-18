@@ -442,6 +442,7 @@ public final class Mappings {
    */
   public String remapDescriptor(String descriptor) {
     StringBuilder result = new StringBuilder();
+    String remaining = descriptor;
     //Method descriptors start with '('
     if(descriptor.startsWith("(")) {
       // split String at ')',
@@ -476,10 +477,10 @@ public final class Mappings {
         result.append(')');
       }
       //descriptor becomes the return type descriptor e.g. "(J[Ljava/lang/String;S)[I" -> [I
-      descriptor = split[1];
+      remaining = split[1];
     }
     //Copy descriptor so e.g. simple [I descs can be returned easily
-    String cpy = descriptor;
+    String cpy = remaining;
     // strip arrays, count the dimensions for later
     int arrDim = 0;
     while(cpy.startsWith("[")) {
@@ -487,11 +488,11 @@ public final class Mappings {
       cpy = cpy.substring(1);
     }
     // primitives don't need to be deobfed
-    if(PRIMITIVES.contains(cpy)) return result + descriptor;
+    if(PRIMITIVES.contains(cpy)) return result + remaining;
     // Strip L and ; for lookup (Lmy/package/Class; -> my/package/Class)
     cpy = cpy.substring(1, cpy.length() - 1);
     // the mappings do not contain the class, no deobfuscation needed (e.g. java/lang/String...)
-    if(!hasClassMapping(cpy)) return result + descriptor;
+    if(!hasClassMapping(cpy)) return result + remaining;
     //prepend the array dimensions if any
     for(int i = 0; i < arrDim; i++) result.append('[');
     //convert deobfed class name to descriptor (my/deobfed/ClassName -> Lmy/deobfed/ClassName;)

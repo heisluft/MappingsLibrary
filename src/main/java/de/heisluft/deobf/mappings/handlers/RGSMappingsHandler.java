@@ -23,6 +23,17 @@ import java.util.List;
  */
 public final class RGSMappingsHandler implements MappingsHandler {
 
+  private static final int RG_COMMAND_TYPE_INDEX = 0;
+  private static final int RG_OBF_NAME_INDEX = 1;
+  private static final int RG_DEOBF_NAME_INDEX = 2;
+  private static final int RG_METHOD_DESC_INDEX = 2;
+  private static final int RG_METHOD_DEOBF_NAME_INDEX = 3;
+
+  private static final int RG_CLASS_LEN = 2;
+  private static final int RG_CLASS_MAPPING_LEN = 3;
+  private static final int RG_FIELD_MAPPING_LEN = 3;
+  private static final int RG_METHOD_MAPPING_LEN = 4;
+
   @Override
   public Collection<String> fileExts() {
     return Collections.singleton("rgs");
@@ -36,27 +47,31 @@ public final class RGSMappingsHandler implements MappingsHandler {
     for(String line : lines) {
       if(line.startsWith("#") || line.isEmpty()) continue;
       String[] words = line.split(" ");
-      if(words.length < 2)
+      if(words.length < RG_CLASS_LEN)
         throw new IllegalArgumentException("Directive given with no arguments! (line '" + line + "')");
-      switch(words[0]) {
+      switch(words[RG_COMMAND_TYPE_INDEX]) {
         case ".class":
-          if(words.length > 2) break;
-          globs.add(words[1]);
+          if(words.length > RG_CLASS_LEN) break;
+          globs.add(words[RG_OBF_NAME_INDEX]);
           break;
         case ".class_map":
-          if(words.length < 3) throw new IllegalArgumentException(argMismatch(line, 2, words.length - 1));
-          mappings.addClassMapping(words[1], words[2]);
+          if(words.length < RG_CLASS_MAPPING_LEN)
+            throw new IllegalArgumentException(argMismatch(line, RG_CLASS_MAPPING_LEN - 1, words.length - 1));
+          mappings.addClassMapping(words[RG_OBF_NAME_INDEX], words[RG_DEOBF_NAME_INDEX]);
           break;
         case ".field_map":
-          if(words.length < 3) throw new IllegalArgumentException(argMismatch(line, 2, words.length - 1));
-          String[] fd = splitAt(words[1], words[1].lastIndexOf('/'));
-          mappings.addFieldMapping(fd[0], fd[1], words[2]);
+          if(words.length < RG_FIELD_MAPPING_LEN)
+            throw new IllegalArgumentException(argMismatch(line, RG_FIELD_MAPPING_LEN - 1, words.length - 1));
+          String[] fd = splitAt(words[RG_OBF_NAME_INDEX], words[RG_OBF_NAME_INDEX].lastIndexOf('/'));
+          mappings.addFieldMapping(fd[0], fd[1], words[RG_DEOBF_NAME_INDEX]);
           break;
         case ".method_map":
-          if(words.length < 4) throw new IllegalArgumentException(argMismatch(line, 3, words.length - 1));
-          String[] md = splitAt(words[1], words[1].lastIndexOf('/'));
-          mappings.addMethodMapping(md[0], md[1], words[2], words[3]);
+          if(words.length < RG_METHOD_MAPPING_LEN)
+            throw new IllegalArgumentException(argMismatch(line, RG_METHOD_MAPPING_LEN - 1, words.length - 1));
+          String[] md = splitAt(words[RG_OBF_NAME_INDEX], words[RG_OBF_NAME_INDEX].lastIndexOf('/'));
+          mappings.addMethodMapping(md[0], md[1], words[RG_METHOD_DESC_INDEX], words[RG_METHOD_DEOBF_NAME_INDEX]);
           break;
+        default: //explicit continue
       }
     }
     for(int i = 0; i < globs.size(); i++) {

@@ -24,15 +24,33 @@ import java.util.List;
  */
 public final class FRGMappingsHandler implements MappingsHandler {
 
-  private final boolean emitFieldDescriptors;
-
   private static final int FRG_MAPPING_TYPE_INDEX = 0;
   private static final int FRG_ENTITY_CLASS_NAME_INDEX = 1;
   private static final int FRG_MAPPED_CLASS_NAME_INDEX = 2;
-  private static final int FRG_DESRIPTED_NAME_INDEX = 2;
+  private static final int FRG_DESC_NAME_INDEX = 2;
   private static final int FRG_MAPPED_FIELD_NAME_INDEX = 3;
-  private static final int FRG_DESCRIPTOR_INDEX = 3;
-  private static final int FRG_DESCRIPTED_MAPPED_NAME_INDEX = 4;
+  private static final int FRG_DESC_INDEX = 3;
+  private static final int FRG_DESC_MAPPED_NAME_INDEX = 4;
+
+  private static final int FRG_CLASS_MAPPING_LEN = 3;
+  private static final int FRG_FIELD_MAPPING_LEN = 4;
+  private static final int FRG_MIN_DESC_MAPPING_LEN = 5;
+
+  private final boolean emitFieldDescriptors;
+
+  /** Used by the ServiceLoader to instantiate this class. */
+  public FRGMappingsHandler() {
+    this(false);
+  }
+
+  /**
+   * Constructs a new Handler instance, maybe capable of emitting field descriptors.
+   *
+   * @param emitFieldDescriptors whether Field descriptors should be emitted
+   */
+  public FRGMappingsHandler(boolean emitFieldDescriptors) {
+    this.emitFieldDescriptors = emitFieldDescriptors;
+  }
 
   @Override
   public Mappings parseMappings(Path input) throws IOException {
@@ -44,35 +62,35 @@ public final class FRGMappingsHandler implements MappingsHandler {
       switch(mappingType) {
         case "MD:":
         case "DF:":
-          if(split.length < 5) throw new IllegalArgumentException(
+          if(split.length < FRG_MIN_DESC_MAPPING_LEN) throw new IllegalArgumentException(
               "Not enough arguments supplied. (" + line + "), expected at least 4 got" + (split.length - 1)
           );
-          if("DF:".equals(mappingType) && split.length != 5) throw new IllegalArgumentException(
-              "Illegal amount of Arguments supplied. (" + line + "), expected 4 got" +
-                  (split.length - 1));
+          if("DF:".equals(mappingType) && split.length != FRG_MIN_DESC_MAPPING_LEN) throw new IllegalArgumentException(
+              "Illegal amount of Arguments supplied. (" + line + "), expected 4 got" + (split.length - 1)
+          );
           String clsName = split[FRG_ENTITY_CLASS_NAME_INDEX];
-          String obfName = split[FRG_DESRIPTED_NAME_INDEX];
-          String obfDesc = split[FRG_DESCRIPTOR_INDEX];
-          String rName = split[FRG_DESCRIPTED_MAPPED_NAME_INDEX];
+          String obfName = split[FRG_DESC_NAME_INDEX];
+          String obfDesc = split[FRG_DESC_INDEX];
+          String rName = split[FRG_DESC_MAPPED_NAME_INDEX];
           if("DF:".equals(mappingType)) {
             builder.addFieldMapping(clsName, obfName, obfDesc, rName);
             break;
           }
           builder.addMethodMapping(clsName, obfName, obfDesc, rName);
-          if(split.length > 5) builder.addExceptions(clsName, obfName, obfDesc,
-              Arrays.asList(split).subList(5, split.length));
+          if(split.length > FRG_MIN_DESC_MAPPING_LEN) builder.addExceptions(clsName, obfName, obfDesc,
+              Arrays.asList(split).subList(FRG_MIN_DESC_MAPPING_LEN, split.length));
           break;
         case "FD:":
-          if(split.length != 4) throw new IllegalArgumentException(
-              "Illegal amount of Arguments supplied. (" + line + "), expected 3 got" +
-                  (split.length - 1));
-          builder.addFieldMapping(split[FRG_ENTITY_CLASS_NAME_INDEX], split[FRG_DESRIPTED_NAME_INDEX],
+          if(split.length != FRG_FIELD_MAPPING_LEN) throw new IllegalArgumentException(
+              "Illegal amount of Arguments supplied. (" + line + "), expected 3 got" + (split.length - 1)
+          );
+          builder.addFieldMapping(split[FRG_ENTITY_CLASS_NAME_INDEX], split[FRG_DESC_NAME_INDEX],
               split[FRG_MAPPED_FIELD_NAME_INDEX]);
           break;
         case "CL:":
-          if(split.length != 3) throw new IllegalArgumentException(
-              "Illegal amount of Arguments supplied. (" + line + "), expected 2 got" +
-                  (split.length - 1));
+          if(split.length != FRG_CLASS_MAPPING_LEN) throw new IllegalArgumentException(
+              "Illegal amount of Arguments supplied. (" + line + "), expected 2 got" + (split.length - 1)
+          );
           builder.addClassMapping(split[FRG_ENTITY_CLASS_NAME_INDEX],
               split[FRG_MAPPED_CLASS_NAME_INDEX]);
           break;
@@ -87,20 +105,6 @@ public final class FRGMappingsHandler implements MappingsHandler {
   @Override
   public MappingsHandler withFileExt(String fileExt) {
     return "srg2".equals(fileExt) && emitFieldDescriptors ? this : new FRGMappingsHandler(!emitFieldDescriptors);
-  }
-
-  /** Used by the ServiceLoader to instantiate this class. */
-  public FRGMappingsHandler() {
-    this(false);
-  }
-
-  /**
-   * Constructs a new Handler instance, maybe capable of emitting field descriptors.
-   *
-   * @param emitFieldDescriptors whether Field descriptors should be emitted
-   */
-  public FRGMappingsHandler(boolean emitFieldDescriptors) {
-    this.emitFieldDescriptors = emitFieldDescriptors;
   }
 
   @Override
