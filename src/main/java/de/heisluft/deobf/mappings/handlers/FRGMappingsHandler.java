@@ -56,7 +56,7 @@ public final class FRGMappingsHandler implements MappingsHandler {
   public Mappings parseMappings(Path input) throws IOException {
     MappingsBuilder builder = new MappingsBuilder();
     List<String> lines = Files.readAllLines(input);
-    for (String line : lines) {
+    for(String line : lines) {
       String[] split = line.split(" ");
       String mappingType = split[FRG_MAPPING_TYPE_INDEX];
       switch(mappingType) {

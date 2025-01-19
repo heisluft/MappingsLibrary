@@ -64,12 +64,14 @@ public final class Mappings {
   Mappings(Mappings toClone) {
     packages.putAll(toClone.packages);
     classes.putAll(toClone.classes);
-    toClone.fields.forEach((k,v) -> fields.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
-    toClone.methods.forEach((k,v) -> methods.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
+    toClone.fields.forEach((k, v) -> fields.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
+    toClone.methods.forEach((k, v) -> methods.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v));
     toClone.extraData.forEach((k, v) ->
         v.forEach((memberData, mdExtra) ->
             extraData.computeIfAbsent(k, _k -> new HashMap<>())
-                .computeIfAbsent(memberData, _k -> new MdExtra(mdExtra))));
+                .computeIfAbsent(memberData, _k -> new MdExtra(mdExtra))
+        )
+    );
   }
 
   /**
@@ -201,7 +203,7 @@ public final class Mappings {
    * @return true if there is a mapping for {@code className}, false otherwise
    */
   public boolean hasClassMapping(String className) {
-    return classes.containsKey(className) ||  packages.keySet().stream().anyMatch(className::matches);
+    return classes.containsKey(className) || packages.keySet().stream().anyMatch(className::matches);
   }
 
   /**
@@ -414,22 +416,19 @@ public final class Mappings {
   public Mappings join(Mappings other) {
     Mappings mappings = new Mappings(other);
     mappings.classes.putAll(classes);
-    fields.forEach(
-        (k,v) ->
-            mappings.fields.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v)
+    fields.forEach((k, v) ->
+        mappings.fields.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v)
     );
-    methods.forEach(
-        (k,v) ->
-            mappings.methods.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v)
+    methods.forEach((k, v) ->
+        mappings.methods.computeIfAbsent(k, _k -> new HashMap<>()).putAll(v)
     );
-    extraData.forEach(
-        (k, v) -> v.forEach((memberData, mdExtra) -> {
-          MdExtra extra = extraData.computeIfAbsent(k, _k -> new HashMap<>()).computeIfAbsent(
-              memberData, _k -> new MdExtra()
-          );
-          extra.exceptions.addAll(mdExtra.exceptions);
-          extra.parameters.clear();
-          extra.parameters.addAll(mdExtra.parameters);
+    extraData.forEach((k, v) -> v.forEach((memberData, mdExtra) -> {
+      MdExtra extra = extraData.computeIfAbsent(k, _k -> new HashMap<>()).computeIfAbsent(
+          memberData, _k -> new MdExtra()
+      );
+      extra.exceptions.addAll(mdExtra.exceptions);
+      extra.parameters.clear();
+      extra.parameters.addAll(mdExtra.parameters);
     }));
     return mappings;
   }

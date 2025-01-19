@@ -7,12 +7,12 @@
     <property name="checks" value="(JavadocPackage|MissingJavadoc.+)"/>
   </module>
 
-  <!-- TODO: "Whitespace" Category Rules-->
   <module name="JavadocPackage"/>
   <module name="NewlineAtEndOfFile"/>
   <module name="LineLength">
     <property name="max" value="120"/>
   </module>
+  <module name="FileTabCharacter"/>
   <module name="TreeWalker">
     <module name="MissingDeprecated"/>
     <module name="MissingOverride"/>
@@ -121,5 +121,39 @@
     <module name="RecordTypeParameterName"/>
     <module name="StaticVariableName"/>
     <module name="TypeName"/>
+
+    <module name="EmptyForInitializerPad"/>
+    <module name="EmptyForIteratorPad"/>
+    <module name="EmptyLineSeparator">
+      <property name="allowNoEmptyLineBetweenFields" value="true"/>
+    </module>
+    <module name="GenericWhitespace"/>
+    <module name="MethodParamPad"/>
+    <module name="NoLineWrap"/>
+    <module name="NoWhitespaceBeforeCaseDefaultColon"/>
+    <module name="NoWhitespaceBefore">
+      <property name="tokens" value="COMMA, SEMI, POST_INC, POST_DEC, ELLIPSIS, LABELED_STAT, METHOD_REF"/>
+    </module>
+    <module name="NoWhitespaceBefore">
+      <property name="tokens" value="DOT"/>
+      <property name="allowLineBreaks" value="true"/>
+    </module>
+    <module name="NoWhitespaceAfter"/>
+    <module name="OperatorWrap"/>
+    <module name="ParenPad"/>
+    <module name="SeparatorWrap">
+      <property name="tokens" value="COMMA, SEMI, ELLIPSIS, LPAREN, ARRAY_DECLARATOR, RBRACK, METHOD_REF"/>
+    </module>
+    <module name="SingleSpaceSeparator"/>
+    <module name="TypecastParenPad"/>
+    <module name="WhitespaceAfter">
+      <property name="tokens" value="COMMA, SEMI, TYPECAST, LITERAL_RETURN, LITERAL_YIELD, ELLIPSIS, LITERAL_CASE, LAMBDA"/>
+    </module>
+    <module name="WhitespaceAround">
+      <property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN,
+        COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAMBDA, LAND, LE, LITERAL_FINALLY, LITERAL_RETURN, LOR, LT, MINUS,
+        MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, SL, SL_ASSIGN, SR, SR_ASSIGN, STAR,
+        STAR_ASSIGN, TYPE_EXTENSION_AND"/>
+    </module>
   </module>
 </module>

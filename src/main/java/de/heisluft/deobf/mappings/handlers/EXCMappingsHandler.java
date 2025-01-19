@@ -29,14 +29,14 @@ public final class EXCMappingsHandler implements MappingsHandler {
       String mName = line.substring(dot + 1, openBrace);
       String mDesc = line.substring(openBrace, eqSign);
       b.addExceptions(cName, mName, mDesc, Arrays.asList(line.substring(eqSign + 1, vertBar).split(",")));
-      b.setParameters(cName, mName, mDesc, Arrays.asList(line.substring(vertBar+1).split(",")));
+      b.setParameters(cName, mName, mDesc, Arrays.asList(line.substring(vertBar + 1).split(",")));
     }
     return b.build();
   }
 
   @Override
   public Collection<String> fileExts() {
-    return Collections.singleton( "exc");
+    return Collections.singleton("exc");
   }
 
   @Override
