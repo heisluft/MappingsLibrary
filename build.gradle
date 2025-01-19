@@ -6,7 +6,7 @@ plugins {
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(11))
   withSourcesJar()
   withJavadocJar()
 }
@@ -25,10 +25,12 @@ dependencies {
 
 checkstyle {
   configFile = project.file("checkstyle.xml")
+  toolVersion = '10.21.1'
 }
 
 tasks.withType(JavaCompile.class).configureEach {
   options.encoding = 'UTF-8'
+  sourceCompatibility = targetCompatibility = '1.8'
 }
 
 jar.manifest.attributes([
