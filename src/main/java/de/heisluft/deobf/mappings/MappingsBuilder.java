@@ -59,6 +59,21 @@ public final class MappingsBuilder {
   }
 
   /**
+   * Retrieves a mapped name for a given class, giving back the className as fallback. Use in
+   * conjunction with {@link Mappings#hasClassMapping(String)}
+   *
+   * @param className
+   *     the classes name
+   *
+   * @return the mapped name or className if not found
+   *
+   * @see Mappings#hasClassMapping(String)
+   */
+  public String getClassName(String className) {
+    return mappings.getClassName(className);
+  }
+
+  /**
    * Adds a package relocation.
    *
    * @param pName the package name. It must be encoded as a regex that matches all classes beginning with it.
@@ -74,7 +89,13 @@ public final class MappingsBuilder {
    * @param cName the binary name of the containing class
    * @param fName the field name to map
    * @param rName the remapped name
+   *
+   * @deprecated the jvm only needs uniqueness of (name + descriptor) combinations, so mappings
+   * added by this mappings may be too broad. Many mapping formats do not support the fine-grained
+   * method, so this method stays. If able, use
+   * {@link #addFieldMapping(String, String, String, String)}.
    */
+  @Deprecated
   public void addFieldMapping(String cName, String fName, String rName) {
     if(!mappings.fields.containsKey(cName)) mappings.fields.put(cName, new HashMap<>());
     mappings.fields.get(cName).put(new MemberData(fName, Mappings.EMPTY_FIELD_DESCRIPTOR), rName);
@@ -94,6 +115,22 @@ public final class MappingsBuilder {
   }
 
   /**
+   * Retrieves a mapped name for a given field.
+   *
+   * @param className
+   *     the name of the class containing the field
+   * @param fieldName
+   *     The fields name
+   * @param fieldDescriptor
+   *     The fields descriptor
+   *
+   * @return the mapped name or {@code null} if not found
+   */
+  public String getFieldName(String className, String fieldName, String fieldDescriptor) {
+    return mappings.getFieldName(className, fieldName, fieldDescriptor);
+  }
+
+  /**
    * Add a method mapping. Existing mappings will be overridden.
    *
    * @param cName the binary name of the containing class
@@ -104,6 +141,22 @@ public final class MappingsBuilder {
   public void addMethodMapping(String cName, String mName, String mDesc, String rName) {
     if(!mappings.methods.containsKey(cName)) mappings.methods.put(cName, new HashMap<>());
     mappings.methods.get(cName).put(new MemberData(mName, mDesc), rName);
+  }
+
+  /**
+   * Retrieves a mapped name for a given method.
+   *
+   * @param className
+   *     the name of the class containing the method
+   * @param methodName
+   *     The methods name
+   * @param methodDescriptor
+   *     The methods descriptor
+   *
+   * @return the mapped name or {@code null} if not found
+   */
+  public String getMethodName(String className, String methodName, String methodDescriptor) {
+    return mappings.getMethodName(className, methodName, methodDescriptor);
   }
 
   /**
