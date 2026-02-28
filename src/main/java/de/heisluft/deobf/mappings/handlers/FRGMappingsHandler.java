@@ -104,7 +104,9 @@ public final class FRGMappingsHandler implements MappingsHandler {
 
   @Override
   public MappingsHandler withFileExt(String fileExt) {
-    return "srg2".equals(fileExt) && emitFieldDescriptors ? this : new FRGMappingsHandler(!emitFieldDescriptors);
+    return "frg2".equals(fileExt)
+        ? emitFieldDescriptors ? this : new FRGMappingsHandler(true)
+        : emitFieldDescriptors ? new FRGMappingsHandler(false) : this;
   }
 
   @Override
