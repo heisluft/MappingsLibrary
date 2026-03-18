@@ -49,6 +49,16 @@ public final class MappingsBuilder {
   }
 
   /**
+   * Adds a package relocation.
+   *
+   * @param pName the package name. It must be encoded as a regex that matches all classes beginning with it.
+   * @param rName the relocated package name
+   */
+  public void addPackageRelocation(String pName, String rName) {
+    mappings.packages.put(pName, rName);
+  }
+
+  /**
    * Add a class mapping. Existing mappings will be overridden.
    *
    * @param cName the binary class name to map
@@ -74,13 +84,25 @@ public final class MappingsBuilder {
   }
 
   /**
-   * Adds a package relocation.
+   * Checks if the mappings contain a mapping for a specific class name.
    *
-   * @param pName the package name. It must be encoded as a regex that matches all classes beginning with it.
-   * @param rName the relocated package name
+   * @param className
+   *     the class name to test for
+   *
+   * @return true if there is a mapping for {@code className}, false otherwise
    */
-  public void addPackageRelocation(String pName, String rName) {
-    mappings.packages.put(pName, rName);
+  public boolean hasClassMapping(String className) {
+    return mappings.classes.containsKey(className);
+  }
+
+  /**
+   * Checks whether any class mapping has className as remapped name.
+   *
+   * @param className the binary class name to look for
+   * @return whether the target is already mapped to
+   */
+  public boolean hasClassRevMapping(String className) {
+    return mappings.classes.containsValue(className);
   }
 
   /**
@@ -131,6 +153,24 @@ public final class MappingsBuilder {
   }
 
   /**
+   * Checks if the mappings contain a mapping for a specific field.
+   *
+   * @param className
+   *     the name of the class declaring the field
+   * @param fieldName
+   *     the name of the field
+   * @param fieldDescriptor
+   *     the fields descriptor
+   *
+   * @return true if there is a mapping for {@code className}, false otherwise
+   */
+  public boolean hasFieldMapping(String className, String fieldName, String fieldDescriptor) {
+    Map<MemberData, String> data = mappings.fields.getOrDefault(className, new HashMap<>());
+    return data.containsKey(new MemberData(fieldName, fieldDescriptor))
+        || data.containsKey(new MemberData(fieldName, Mappings.EMPTY_FIELD_DESCRIPTOR));
+  }
+
+  /**
    * Add a method mapping. Existing mappings will be overridden.
    *
    * @param cName the binary name of the containing class
@@ -157,6 +197,23 @@ public final class MappingsBuilder {
    */
   public String getMethodName(String className, String methodName, String methodDescriptor) {
     return mappings.getMethodName(className, methodName, methodDescriptor);
+  }
+
+  /**
+   * Checks if the mappings contain a mapping for a specific method.
+   *
+   * @param className
+   *     the name of the class declaring the method
+   * @param methodName
+   *     the name of the method
+   * @param methodDescriptor
+   *     the descriptor of the method
+   *
+   * @return true if there is a mapping for the method, false otherwise
+   */
+  public boolean hasMethodMapping(String className, String methodName, String methodDescriptor) {
+    return mappings.methods.getOrDefault(className, new HashMap<>())
+        .containsKey(new MemberData(methodName, methodDescriptor));
   }
 
   /**
@@ -217,59 +274,5 @@ public final class MappingsBuilder {
   public boolean hasExceptionsFor(String cName, String mName, String mDesc) {
     return !mappings.extraData.getOrDefault(cName, Collections.emptyMap())
         .getOrDefault(new MemberData(mName, mDesc), MdExtra.EMPTY).exceptions.isEmpty();
-  }
-
-  /**
-   * Checks if the mappings contain a mapping for a specific class name.
-   *
-   * @param className
-   *     the class name to test for
-   *
-   * @return true if there is a mapping for {@code className}, false otherwise
-   */
-  public boolean hasClassMapping(String className) {
-    return mappings.classes.containsKey(className);
-  }
-
-  /**
-   * Checks if the mappings contain a mapping for a specific method.
-   *
-   * @param className
-   *     the name of the class declaring the method
-   * @param methodName
-   *     the name of the method
-   * @param methodDescriptor
-   *     the descriptor of the method
-   *
-   * @return true if there is a mapping for the method, false otherwise
-   */
-  public boolean hasMethodMapping(String className, String methodName, String methodDescriptor) {
-    return mappings.methods.getOrDefault(className, new HashMap<>())
-        .containsKey(new MemberData(methodName, methodDescriptor));
-  }
-
-  /**
-   * Checks if the mappings contain a mapping for a specific field.
-   *
-   * @param className
-   *     the name of the class declaring the field
-   * @param fieldName
-   *     the name of the field
-   *
-   * @return true if there is a mapping for {@code className}, false otherwise
-   */
-  public boolean hasFieldMapping(String className, String fieldName) {
-    return mappings.fields.getOrDefault(className, new HashMap<>())
-        .containsKey(new MemberData(fieldName, Mappings.EMPTY_FIELD_DESCRIPTOR));
-  }
-
-  /**
-   * Checks whether any class mapping has lookFor as remapped name.
-   *
-   * @param lookFor the binary class name to look for
-   * @return whether the target is already mapped to
-   */
-  public boolean hasClassNameTarget(String lookFor) {
-    return mappings.classes.containsValue(lookFor);
   }
 }

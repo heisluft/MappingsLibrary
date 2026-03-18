@@ -1,8 +1,6 @@
 package de.heisluft.deobf.mappings;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -157,25 +155,6 @@ public final class Mappings {
 
   /**
    * Retrieves a mapped name for a given field.
-   * NOTE: This will not find a mapping if the mappings are field-descriptor sensitive.
-   *
-   * @param className
-   *     the name of the class containing the field
-   * @param fieldName
-   *     The fields name
-   *
-   * @return the mapped name or {@code null} if not found
-   *
-   * @deprecated use {@link #getFieldName(String, String, String)} instead
-   */
-  @Deprecated
-  public String getFieldName(String className, String fieldName) {
-    return fields.getOrDefault(className, Collections.emptyMap())
-        .get(new MemberData(fieldName, EMPTY_FIELD_DESCRIPTOR));
-  }
-
-  /**
-   * Retrieves a mapped name for a given field.
    *
    * @param className
    *     the name of the class containing the field
@@ -221,25 +200,6 @@ public final class Mappings {
   public boolean hasMethodMapping(String className, String methodName, String methodDescriptor) {
     return methods.getOrDefault(className, Collections.emptyMap()).containsKey(
         new MemberData(methodName, methodDescriptor)
-    );
-  }
-
-  /**
-   * Checks if the mappings contain a mapping for a specific field.
-   *
-   * @param className
-   *     the name of the class declaring the field
-   * @param fieldName
-   *     the name of the field
-   *
-   * @return true if there is a mapping for {@code className}, false otherwise
-   *
-   * @deprecated use {@link #hasFieldMapping(String, String, String)} instead
-   */
-  @Deprecated
-  public boolean hasFieldMapping(String className, String fieldName) {
-    return fields.getOrDefault(className, Collections.emptyMap()).containsKey(
-        new MemberData(fieldName, EMPTY_FIELD_DESCRIPTOR)
     );
   }
 
@@ -454,7 +414,7 @@ public final class Mappings {
         result.append("(");
         //Parse chars LTR
         PrimitiveIterator.OfInt iterator = argsDescriptor.chars().iterator();
-        List<Character> currentName = new ArrayList<>();
+        StringBuilder currentName = new StringBuilder();
         boolean inWord = false;
         while(iterator.hasNext()) {
           char c = (char) iterator.nextInt();
@@ -463,15 +423,15 @@ public final class Mappings {
             //Reference descriptors start with 'L'
           } else if(c == 'L') {
             inWord = true;
-            currentName.add(c);
+            currentName.append(c);
             // ';' marks the end of a reference type descriptor
           } else if(c == ';') {
-            currentName.add(c);
+            currentName.append(c);
             // deobfuscate the finished descriptor and append it
-            result.append(remapDescriptor(toString(currentName)));
-            currentName.clear();
+            result.append(remapDescriptor(currentName.toString()));
+            currentName.setLength(0);
             inWord = false;
-          } else currentName.add(c);
+          } else currentName.append(c);
         }
         result.append(')');
       }
@@ -496,19 +456,5 @@ public final class Mappings {
     for(int i = 0; i < arrDim; i++) result.append('[');
     //convert deobfed class name to descriptor (my/deobfed/ClassName -> Lmy/deobfed/ClassName;)
     return result.append('L').append(getClassName(cpy)).append(';').toString();
-  }
-
-  /**
-   * Joins the given Collection of characters to a string.
-   *
-   * @param chars
-   *     the chars to be joined
-   *
-   * @return the joined string
-   */
-  private static String toString(Collection<Character> chars) {
-    StringBuilder builder = new StringBuilder();
-    chars.forEach(builder::append);
-    return builder.toString();
   }
 }
