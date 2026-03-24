@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,8 +33,8 @@ public final class EXCMappingsHandler implements MappingsHandler {
   }
 
   @Override
-  public Collection<String> fileExts() {
-    return Collections.singleton("exc");
+  public String fileExt() {
+    return "exc";
   }
 
   @Override

@@ -52,8 +52,7 @@ public final class MappingsHandlers {
    */
   private static void checkInit() {
     if (hasFetched) return;
-    ServiceLoader.load(MappingsHandler.class)
-        .forEach(m -> m.fileExts().forEach(ext -> HANDLERS.put(ext, m.withFileExt(ext))));
+    ServiceLoader.load(MappingsHandler.class).forEach(m -> HANDLERS.put(m.fileExt(), m));
     hasFetched = true;
   }
 

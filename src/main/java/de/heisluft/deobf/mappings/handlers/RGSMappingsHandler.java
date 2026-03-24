@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,7 +17,6 @@ import java.util.List;
  * While the first three are self-explanatory
  * the .class allows package relocations and access modifiers.
  * We only parse in the former.
- *
  */
 public final class RGSMappingsHandler implements MappingsHandler {
 
@@ -33,11 +30,6 @@ public final class RGSMappingsHandler implements MappingsHandler {
   private static final int RG_CLASS_MAPPING_LEN = 3;
   private static final int RG_FIELD_MAPPING_LEN = 3;
   private static final int RG_METHOD_MAPPING_LEN = 4;
-
-  @Override
-  public Collection<String> fileExts() {
-    return Collections.singleton("rgs");
-  }
 
   @Override
   public Mappings parseMappings(Path path) throws IOException {
@@ -80,6 +72,11 @@ public final class RGSMappingsHandler implements MappingsHandler {
       mappings.addPackageRelocation(regex, newPackage);
     }
     return mappings.build();
+  }
+
+  @Override
+  public String fileExt() {
+    return "rgs";
   }
 
   private String argMismatch(String line, int expected, int actual) {

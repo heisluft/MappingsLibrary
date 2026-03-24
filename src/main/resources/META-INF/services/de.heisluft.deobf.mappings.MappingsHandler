@@ -1,4 +1,5 @@
 de.heisluft.deobf.mappings.handlers.FRGMappingsHandler
+de.heisluft.deobf.mappings.handlers.FRG2MappingsHandler
 de.heisluft.deobf.mappings.handlers.RGSMappingsHandler
 de.heisluft.deobf.mappings.handlers.SRGMappingsHandler
 de.heisluft.deobf.mappings.handlers.EXCMappingsHandler

@@ -2,7 +2,6 @@ package de.heisluft.deobf.mappings;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
 
 /**
  * A MappingsHandler is a class capable of parsing mapping files.
@@ -36,24 +35,11 @@ public interface MappingsHandler {
   }
 
   /**
-   * Parameterizes this Service with one of the file extensions returned by {@link #fileExts()}.
-   * Handlers providing multiple extensions might want to return new instances here
+   * Returns the handled file extension.
    *
-   * @param fileExt the file extension to use
-   * @return a maybe new MappingsHandler instance, never {@code null}.
+   * @return the file extension handled by this instance, never {@code null}
    */
-  default MappingsHandler withFileExt(String fileExt) {
-    return this;
-  }
-
-  /**
-   * Returns a collection of handled file extensions. NOTE: Implementations are strongly encouraged
-   * to override this method to ensure forward compatability, this method WILL become abstract in
-   * a future release.
-   *
-   * @return a collection of file extensions handled by this instance, never {@code null}
-   */
-  Collection<String> fileExts();
+  String fileExt();
 
   /**
    * Checks whether this handler can (de-)serialize exception data.

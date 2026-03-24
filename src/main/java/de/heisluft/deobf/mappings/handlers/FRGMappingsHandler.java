@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,22 +35,6 @@ public final class FRGMappingsHandler implements MappingsHandler {
   private static final int FRG_FIELD_MAPPING_LEN = 4;
   private static final int FRG_MIN_DESC_MAPPING_LEN = 5;
 
-  private final boolean emitFieldDescriptors;
-
-  /** Used by the ServiceLoader to instantiate this class. */
-  public FRGMappingsHandler() {
-    this(false);
-  }
-
-  /**
-   * Constructs a new Handler instance, maybe capable of emitting field descriptors.
-   *
-   * @param emitFieldDescriptors whether Field descriptors should be emitted
-   */
-  public FRGMappingsHandler(boolean emitFieldDescriptors) {
-    this.emitFieldDescriptors = emitFieldDescriptors;
-  }
-
   @Override
   public Mappings parseMappings(Path input) throws IOException {
     MappingsBuilder builder = new MappingsBuilder();
@@ -61,21 +44,13 @@ public final class FRGMappingsHandler implements MappingsHandler {
       String mappingType = split[FRG_MAPPING_TYPE_INDEX];
       switch(mappingType) {
         case "MD:":
-        case "DF:":
           if(split.length < FRG_MIN_DESC_MAPPING_LEN) throw new IllegalArgumentException(
               "Not enough arguments supplied. (" + line + "), expected at least 4 got" + (split.length - 1)
-          );
-          if("DF:".equals(mappingType) && split.length != FRG_MIN_DESC_MAPPING_LEN) throw new IllegalArgumentException(
-              "Illegal amount of Arguments supplied. (" + line + "), expected 4 got" + (split.length - 1)
           );
           String clsName = split[FRG_ENTITY_CLASS_NAME_INDEX];
           String obfName = split[FRG_DESC_NAME_INDEX];
           String obfDesc = split[FRG_DESC_INDEX];
           String rName = split[FRG_DESC_MAPPED_NAME_INDEX];
-          if("DF:".equals(mappingType)) {
-            builder.addFieldMapping(clsName, obfName, obfDesc, rName);
-            break;
-          }
           builder.addMethodMapping(clsName, obfName, obfDesc, rName);
           if(split.length > FRG_MIN_DESC_MAPPING_LEN) builder.addExceptions(clsName, obfName, obfDesc,
               Arrays.asList(split).subList(FRG_MIN_DESC_MAPPING_LEN, split.length));
@@ -103,20 +78,8 @@ public final class FRGMappingsHandler implements MappingsHandler {
   }
 
   @Override
-  public MappingsHandler withFileExt(String fileExt) {
-    return "frg2".equals(fileExt)
-        ? emitFieldDescriptors ? this : new FRGMappingsHandler(true)
-        : emitFieldDescriptors ? new FRGMappingsHandler(false) : this;
-  }
-
-  @Override
-  public boolean supportsFieldDescriptors() {
-    return true;
-  }
-
-  @Override
-  public Collection<String> fileExts() {
-    return Arrays.asList("frg", "frg2");
+  public String fileExt() {
+    return "frg";
   }
 
   @Override
@@ -128,11 +91,9 @@ public final class FRGMappingsHandler implements MappingsHandler {
   public void writeMappings(Mappings mappings, Path to) throws IOException {
     List<String> lines = new ArrayList<>();
     mappings.forAllClasses((k, v) -> lines.add("CL: " + k + " " + v));
-    mappings.forAllFields((clsName, obfName, obfDesc, deobfName) -> {
-      if(emitFieldDescriptors)
-        lines.add("DF: " + clsName + " " + obfName + " " + obfDesc + " " + deobfName);
-      else lines.add("FD: " + clsName + " " + obfName + " " + deobfName);
-    });
+    mappings.forAllFields((clsName, obfName, obfDesc, deobfName) ->
+      lines.add("FD: " + clsName + " " + obfName + " " + deobfName)
+    );
     mappings.forAllMethods((clsName, obfName, obfDesc, deobfName) -> {
       StringBuilder line = new StringBuilder("MD: " + clsName + " " + obfName + " " + obfDesc + " " + deobfName);
       mappings.getExceptions(clsName, obfName, obfDesc).stream().sorted().forEach(s -> line.append(" ").append(s));

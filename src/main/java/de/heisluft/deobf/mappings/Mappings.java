@@ -95,7 +95,7 @@ public final class Mappings {
    *
    * @param consumer the function to apply
    */
-  public void forAllFields(MemberMappingConsumer consumer) {
+  public void forAllFields(MemberMappingConsumer<String> consumer) {
     fields.forEach((s, members) ->
         members.forEach((data, remapped) ->
             consumer.accept(s, data.name, data.desc, remapped)
@@ -108,11 +108,24 @@ public final class Mappings {
    *
    * @param consumer the function to apply
    */
-  public void forAllMethods(MemberMappingConsumer consumer) {
+  public void forAllMethods(MemberMappingConsumer<String> consumer) {
     methods.forEach((s, members) ->
         members.forEach((data, remapped) ->
             consumer.accept(s, data.name, data.desc, remapped)
         )
+    );
+  }
+
+  /**
+   * Applies a method to all exception data.
+   *
+   * @param consumer the function to apply
+   */
+  public void forAllExceptions(MemberMappingConsumer<Set<String>> consumer) {
+    extraData.forEach((s, members) ->
+      members.forEach((member, extra) ->
+          consumer.accept(s, member.name, member.desc, extra.exceptions)
+      )
     );
   }
 
@@ -183,6 +196,21 @@ public final class Mappings {
    */
   public boolean hasClassMapping(String className) {
     return classes.containsKey(className) || packages.keySet().stream().anyMatch(className::matches);
+  }
+
+  /**
+   * Checks if any exceptions are mapped for a given method.
+   *
+   * @param className
+   *     the name of the class declaring the method
+   * @param methodName
+   *     the name of the method
+   * @param methodDescriptor
+   *     the descriptor of the method
+   * @return true if there are any exceptions for the method, false otherwise
+   */
+  public boolean hasExceptionsFor(String className, String methodName, String methodDescriptor) {
+    return extraData.getOrDefault(className, new HashMap<>()).containsKey(new MemberData(methodName, methodDescriptor));
   }
 
   /**

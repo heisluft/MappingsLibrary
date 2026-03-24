@@ -7,8 +7,6 @@ import de.heisluft.deobf.mappings.MappingsHandler;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -85,12 +83,7 @@ public final class SRGMappingsHandler implements MappingsHandler {
   }
 
   @Override
-  public void writeMappings(Mappings mappings, Path output) throws IOException {
-    MappingsHandler.super.writeMappings(mappings, output);
-  }
-
-  @Override
-  public Collection<String> fileExts() {
-    return Collections.singleton("srg");
+  public String fileExt() {
+    return "srg";
   }
 }
