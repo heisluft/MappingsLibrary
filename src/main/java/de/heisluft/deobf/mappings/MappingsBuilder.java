@@ -217,20 +217,6 @@ public final class MappingsBuilder {
   }
 
   /**
-   * Adds all exceptions to the mappings. Exceptions will be appended instead of overridden.
-   *
-   * @param exceptions the list of exceptions to add
-   */
-  public void addExceptions(Map<String, List<String>> exceptions) {
-    exceptions.forEach((s, strings) -> {
-      int dot = s.indexOf('.'), lPar = s.indexOf('(');
-      mappings.extraData.computeIfAbsent(s.substring(0, dot), t -> new HashMap<>())
-          .computeIfAbsent(new MemberData(s.substring(dot + 1, lPar), s.substring(lPar)), _k -> new MdExtra())
-          .exceptions.addAll(strings);
-    });
-  }
-
-  /**
    * Adds exceptions for the given method to the mappings. Exceptions will be appended instead of overridden.
    *
    * @param className the binary name of the containing class
