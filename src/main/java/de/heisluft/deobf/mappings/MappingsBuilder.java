@@ -106,7 +106,8 @@ public final class MappingsBuilder {
   }
 
   /**
-   * Add a field mapping. Existing mappings will be overridden.
+   * Add a field mapping. The mapping will only be added if there are no other field mappings with
+   * their descriptors set. Existing mappings will be overridden.
    *
    * @param cName the binary name of the containing class
    * @param fName the field name to map
@@ -119,12 +120,14 @@ public final class MappingsBuilder {
    */
   @Deprecated
   public void addFieldMapping(String cName, String fName, String rName) {
-    if(!mappings.fields.containsKey(cName)) mappings.fields.put(cName, new HashMap<>());
-    mappings.fields.get(cName).put(new MemberData(fName, Mappings.EMPTY_FIELD_DESCRIPTOR), rName);
+    Map<MemberData, String> cMappings = mappings.fields.computeIfAbsent(cName, k -> new HashMap<>());
+    if(cMappings.keySet().stream().noneMatch(md -> md.name.equals(fName)))
+      cMappings.put(new MemberData(fName, Mappings.EMPTY_FIELD_DESCRIPTOR), rName);
   }
 
   /**
-   * Add a field mapping. Existing mappings will be overridden.
+   * Add a field mapping. Existing mappings will be overridden. This includes field mappings without
+   * descriptors.
    *
    * @param cName the binary name of the containing class
    * @param fName the field name to map
@@ -132,8 +135,9 @@ public final class MappingsBuilder {
    * @param rName the remapped name
    */
   public void addFieldMapping(String cName, String fName, String fDesc, String rName) {
-    if(!mappings.fields.containsKey(cName)) mappings.fields.put(cName, new HashMap<>());
-    mappings.fields.get(cName).put(new MemberData(fName, fDesc), rName);
+    Map<MemberData, String> cMappings = mappings.fields.computeIfAbsent(cName, k -> new HashMap<>());
+    cMappings.put(new MemberData(fName, fDesc), rName);
+    cMappings.remove(new MemberData(fName, Mappings.EMPTY_FIELD_DESCRIPTOR));
   }
 
   /**
