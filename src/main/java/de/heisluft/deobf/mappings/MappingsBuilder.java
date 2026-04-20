@@ -265,4 +265,11 @@ public final class MappingsBuilder {
     return !mappings.extraData.getOrDefault(cName, Collections.emptyMap())
         .getOrDefault(new MemberData(mName, mDesc), MdExtra.EMPTY).exceptions.isEmpty();
   }
+
+  /**
+   * Clears all data which is not naming information (exceptions and parameter names).
+   */
+  public void clearExceptionsAndParameters() {
+    mappings.extraData.clear();
+  }
 }
